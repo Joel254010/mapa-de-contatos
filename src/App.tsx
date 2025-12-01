@@ -9,8 +9,10 @@ import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { Conversa } from './types/conversa';
-import { supabase } from './lib/supabase';
 import ConversaCard from './components/ConversaCard';
+
+// ❌ Removido Supabase
+// import { supabase } from './lib/supabase';
 
 type Page = 'dashboard' | 'add' | 'category' | 'state' | 'flow' | 'settings';
 
@@ -18,34 +20,42 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredConversas, setFilteredConversas] = useState<Conversa[]>([]);
+  const [allConversas, setAllConversas] = useState<Conversa[]>([]);
 
+  // 🔄 Carregar conversas salvas localmente (por enquanto substitui o banco)
+  useEffect(() => {
+    const storage = localStorage.getItem("conversas");
+    if (storage) {
+      setAllConversas(JSON.parse(storage));
+    }
+  }, []);
+
+  // 🔎 Sistema de busca local
   useEffect(() => {
     if (searchQuery) {
       searchConversas(searchQuery);
     } else {
       setFilteredConversas([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allConversas]);
 
-  const searchConversas = async (query: string) => {
+  // 🔍 Busca sem Supabase (agora local)
+  const searchConversas = (query: string) => {
     if (!query.trim()) {
       setFilteredConversas([]);
       return;
     }
 
-    try {
-      const { data } = await supabase
-        .from('conversas')
-        .select('*')
-        .or(`nome.ilike.%${query}%,telefone.ilike.%${query}%,categoria.ilike.%${query}%,estado.ilike.%${query}%`)
-        .order('updated_at', { ascending: false });
+    const q = query.toLowerCase();
 
-      if (data) {
-        setFilteredConversas(data);
-      }
-    } catch (error) {
-      console.error('Error searching conversas:', error);
-    }
+    const results = allConversas.filter(conversa =>
+      conversa.nome.toLowerCase().includes(q) ||
+      conversa.telefone.toLowerCase().includes(q) ||
+      conversa.categoria.toLowerCase().includes(q) ||
+      conversa.estado.toLowerCase().includes(q)
+    );
+
+    setFilteredConversas(results);
   };
 
   const handleNavigate = (page: string) => {
@@ -55,6 +65,11 @@ function AppContent() {
   };
 
   const handleAddSuccess = () => {
+    // 🔄 Recarregar conversas após adicionar nova
+    const storage = localStorage.getItem("conversas");
+    if (storage) {
+      setAllConversas(JSON.parse(storage));
+    }
     setCurrentPage('dashboard');
   };
 
