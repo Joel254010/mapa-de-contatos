@@ -1,6 +1,28 @@
-import { createClient } from '@supabase/supabase-js';
+// Supabase desativado temporariamente para evitar erros no Netlify.
+// Tudo que usar "supabase" no app deve ser adaptado para localStorage enquanto isso.
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const supabase = {
+  from() {
+    return {
+      select() {
+        return Promise.resolve({ data: [] });
+      },
+      insert() {
+        return Promise.resolve({ data: [], error: null });
+      },
+      update() {
+        return Promise.resolve({ data: [], error: null });
+      },
+      delete() {
+        return Promise.resolve({ data: [], error: null });
+      },
+      or() {
+        return Promise.resolve({ data: [], error: null });
+      },
+      order() {
+        return Promise.resolve({ data: [], error: null });
+      },
+    };
+  }
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
