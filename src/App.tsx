@@ -70,10 +70,10 @@ function AppContent() {
   const handleAddSuccess = () => {
     const storage = localStorage.getItem("conversas");
     if (storage) setAllConversas(JSON.parse(storage));
-
     setCurrentPage('dashboard');
   };
 
+  /* ====================== RENDER DA PAGE ====================== */
   const renderPage = () => {
     if (searchQuery && filteredConversas.length > 0) {
       return (
@@ -117,8 +117,10 @@ function AppContent() {
     }
   };
 
+  /* ====================== LAYOUT ====================== */
+
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
 
       {/* 📱 SIDEBAR COM SUPORTE A MOBILE */}
       <Sidebar
@@ -129,7 +131,7 @@ function AppContent() {
       />
 
       {/* 📱 CONTEÚDO PRINCIPAL */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col"> {/* ❗ REMOVIDO overflow-hidden */}
 
         <Header
           searchQuery={searchQuery}
@@ -144,7 +146,9 @@ function AppContent() {
       </div>
     </div>
   );
-}
+} // <= 👈 ESSA CHAVE FALTAVA!!
+
+/* ====================== ROOT APP ====================== */
 
 function App() {
   return (
@@ -155,3 +159,4 @@ function App() {
 }
 
 export default App;
+

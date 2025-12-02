@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ============================================================
-   🌎 AJUSTES GLOBAIS — RESPONSIVIDADE MOBILE (APP NATIVO)
+   🌎 AJUSTES GLOBAIS — MOBILE
    ============================================================ */
 
 html, body {
@@ -29,13 +29,21 @@ main {
   overflow-x: hidden;
 }
 
-/* Remover scroll lateral em qualquer container */
 * {
   box-sizing: border-box;
+  touch-action: auto; /* 🔥 evita travar scroll */
 }
 
 /* ============================================================
-   📌 SIDEBAR MOBILE — ESTILO APP
+   🔥 FIX — CARDS DEVEM PERMITIR SCROLL VERTICAL
+   ============================================================ */
+
+.drag-card {
+  touch-action: pan-y !important;  /* permite scroll suave */
+}
+
+/* ============================================================
+   📌 SIDEBAR MOBILE
    ============================================================ */
 
 .sidebar {
@@ -62,7 +70,6 @@ main {
   }
 }
 
-/* Overlay escurecido atrás da sidebar */
 .sidebar-overlay {
   display: none;
 }
@@ -86,7 +93,7 @@ main {
 }
 
 /* ============================================================
-   📌 HEADER FIXO — ESTILO APP iOS / ANDROID
+   📌 HEADER FIXO
    ============================================================ */
 
 header {
@@ -108,7 +115,7 @@ header {
 }
 
 /* ============================================================
-   📌 GRID GLOBAL — AUTO AJUSTE NO CELULAR
+   📌 GRID GLOBAL
    ============================================================ */
 
 .grid-auto-responsive {
@@ -122,7 +129,6 @@ header {
   }
 }
 
-/* Cards ocupam toda largura no mobile */
 .card,
 .conversa-card,
 .dashboard-card {
@@ -131,7 +137,7 @@ header {
 }
 
 /* ============================================================
-   📌 INPUTS E FORMULÁRIOS — MOBILE PREMIUM
+   📌 FORMULÁRIOS
    ============================================================ */
 
 input,
@@ -141,7 +147,6 @@ select {
   border-radius: 10px;
 }
 
-/* Evita zoom automático no iPhone */
 @media (max-width: 480px) {
   input,
   textarea,
@@ -152,24 +157,25 @@ select {
 }
 
 /* ============================================================
-   📌 AJUSTE GLOBAL PARA SCROLL EM PÁGINAS LONGAS
+   🔥 FIX PRINCIPAL — SCROLL SUAVE MOBILE
    ============================================================ */
 
 .mobile-scroll {
-  height: calc(100vh - 60px);
+  height: 100%;
+  min-height: calc(100dvh - 60px); /* usa viewport dinâmica moderna */
   overflow-y: auto;
   padding-bottom: 2rem;
+  -webkit-overflow-scrolling: touch; /* iOS */
 }
 
 /* ============================================================
-   📌 BOTÕES UNIVERSAIS — MELHOR TOQUE NO SMARTPHONE
+   📌 BOTÕES
    ============================================================ */
 
 button {
   touch-action: manipulation;
 }
 
-/* Aumenta área de toque no mobile */
 @media (max-width: 480px) {
   button {
     padding: 10px 14px;
@@ -177,7 +183,7 @@ button {
 }
 
 /* ============================================================
-   📌 TÍTULOS RESPONSIVOS
+   📌 TÍTULOS
    ============================================================ */
 
 @media (max-width: 480px) {
