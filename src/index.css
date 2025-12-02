@@ -192,3 +192,12 @@ button {
   h3 { font-size: 1.1rem !important; }
   .text-lg { font-size: 1rem !important; }
 }
+
+.sidebar {
+  position: fixed;
+  z-index: 9999 !important;
+}
+
+.sidebar-overlay {
+  z-index: 9998 !important;
+}
