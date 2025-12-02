@@ -3,7 +3,7 @@ import { Conversa, STATUS_OPTIONS, Status } from '../types/conversa';
 import ConversaCard from '../components/ConversaCard';
 
 /* ======================================================
-    STATUS FLOW — LOCALSTORAGE APENAS
+    STATUS FLOW — SUPORTE DESKTOP + MOBILE
    ====================================================== */
 
 export default function StatusFlow() {
@@ -19,11 +19,7 @@ export default function StatusFlow() {
   const loadConversas = () => {
     try {
       const storage = localStorage.getItem("conversas");
-      if (!storage) {
-        setConversas([]);
-      } else {
-        setConversas(JSON.parse(storage));
-      }
+      setConversas(storage ? JSON.parse(storage) : []);
     } catch (error) {
       console.error("Erro ao carregar conversas:", error);
     } finally {
@@ -38,7 +34,17 @@ export default function StatusFlow() {
   const getConversasByStatus = (status: Status) =>
     conversas.filter(c => c.status === status);
 
+  /* ==========================================================
+     DESKTOP → inicia drag nativo
+  ========================================================== */
   const handleDragStart = (conversa: Conversa) => {
+    setDraggedItem(conversa);
+  };
+
+  /* ==========================================================
+     MOBILE → inicia drag quando desliza o dedo
+  ========================================================== */
+  const handleDragStartMobile = (conversa: Conversa) => {
     setDraggedItem(conversa);
   };
 
@@ -54,7 +60,6 @@ export default function StatusFlow() {
       return;
     }
 
-    // 🔄 Atualiza lista localmente
     const atualizada = conversas.map(c =>
       c.id === draggedItem.id
         ? { ...c, status: newStatus, updated_at: new Date().toISOString() }
@@ -153,7 +158,10 @@ export default function StatusFlow() {
                         onDragStart={() => handleDragStart(conversa)}
                         className="cursor-move active:scale-[0.98] transition-transform"
                       >
-                        <ConversaCard conversa={conversa} />
+                        <ConversaCard
+                          conversa={conversa}
+                          onDragStartMobile={handleDragStartMobile}
+                        />
                       </div>
                     ))
                   ) : (

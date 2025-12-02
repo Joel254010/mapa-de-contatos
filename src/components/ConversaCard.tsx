@@ -1,12 +1,19 @@
 import { Phone, Calendar, MapPin, Tag } from 'lucide-react';
+import { useRef } from 'react';
 import { Conversa } from '../types/conversa';
 
 interface ConversaCardProps {
   conversa: Conversa;
   onClick?: () => void;
+  onDragStartMobile?: (conversa: Conversa) => void;
 }
 
-export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
+export default function ConversaCard({ conversa, onClick, onDragStartMobile }: ConversaCardProps) {
+
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const dragging = useRef(false);
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'Iniciada': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -19,16 +26,46 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
   };
 
   const formatPhone = (phone: string) => phone.replace(/\D/g, '');
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+  /* ==========================================================
+     TOUCH EVENTS PARA MOBILE (arrastar no dedo)
+  ========================================================== */
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStartX.current = t.clientX;
+    touchStartY.current = t.clientY;
+    dragging.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    const dx = Math.abs(t.clientX - touchStartX.current);
+    const dy = Math.abs(t.clientY - touchStartY.current);
+
+    // Se mover mais de 10px → inicia o drag mobile
+    if (dx > 10 || dy > 10) {
+      dragging.current = true;
+
+      if (onDragStartMobile) {
+        onDragStartMobile(conversa);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // Se não arrastou → é click normal
+    if (!dragging.current && onClick) {
+      onClick();
+    }
   };
 
   return (
     <div
-      onClick={onClick}
       draggable={false}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       className="
         bg-white dark:bg-gray-800 
         rounded-xl p-4 shadow-sm hover:shadow-md 
@@ -40,25 +77,21 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
 
       {/* HEADER */}
       <div className="flex items-start justify-between mb-3">
-        
         <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-lg leading-tight">
           {conversa.nome}
         </h3>
 
-        <span
-          className={`
+        <span className={`
             px-2 py-1 rounded-full text-[10px] md:text-xs font-medium whitespace-nowrap
             ${getStatusColor(conversa.status)}
-          `}
-        >
+        `}>
           {conversa.status}
         </span>
       </div>
 
-      {/* LISTA DE INFOS */}
+      {/* INFO */}
       <div className="space-y-2 text-sm md:text-[15px]">
-
-        {/* TELEFONE */}
+        
         <a
           href={`https://wa.me/${formatPhone(conversa.telefone)}`}
           target="_blank"
@@ -66,38 +99,32 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
           onClick={(e) => e.stopPropagation()}
           className="flex items-center gap-2 text-[#25D366] hover:text-[#1DA851] transition-colors"
         >
-          <Phone size={18} className="md:size-20" />
+          <Phone size={18} />
           <span className="truncate">{conversa.telefone}</span>
         </a>
 
-        {/* ESTADO */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <MapPin size={18} />
           <span>{conversa.estado}</span>
         </div>
 
-        {/* CATEGORIA */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Tag size={18} />
           <span className="capitalize">{conversa.categoria}</span>
         </div>
 
-        {/* DATA */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Calendar size={18} />
           <span>{formatDate(conversa.data)}</span>
         </div>
       </div>
 
-      {/* DESCRIÇÃO */}
       {conversa.descricao && (
-        <p className="
-          mt-3 text-sm md:text-[15px] text-gray-600 dark:text-gray-400 
-          line-clamp-2 leading-snug
-        ">
+        <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-snug">
           {conversa.descricao}
         </p>
       )}
+
     </div>
   );
 }
