@@ -3,34 +3,25 @@ import { Conversa, STATUS_OPTIONS, Status } from "../types/conversa";
 import ConversaCard from "../components/ConversaCard";
 
 /* ======================================================
-    STATUS FLOW — SUPORTE 100% DESKTOP + MOBILE
+      STATUS FLOW — DRAG IGUAL DESKTOP + MOBILE REAL
    ====================================================== */
 
 export default function StatusFlow() {
   const [conversas, setConversas] = useState<Conversa[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // item sendo arrastado
-  const [draggedItem, setDraggedItem] = useState<Conversa | null>(null);
+  // item arrastado
+  const draggedItem = useRef<Conversa | null>(null);
 
-  // controles de touch mobile
-  const ghostRef = useRef<HTMLDivElement | null>(null);
-  const touchOffset = useRef({ x: 0, y: 0 });
+  // timeout para ativar drag no mobile
+  const dragTimeout = useRef<any>(null);
+  const dragging = useRef(false);
 
   useEffect(() => {
-    loadConversas();
+    const storage = localStorage.getItem("conversas");
+    setConversas(storage ? JSON.parse(storage) : []);
+    setLoading(false);
   }, []);
-
-  const loadConversas = () => {
-    try {
-      const storage = localStorage.getItem("conversas");
-      setConversas(storage ? JSON.parse(storage) : []);
-    } catch (error) {
-      console.error("Erro ao carregar conversas:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const saveConversas = (lista: Conversa[]) => {
     localStorage.setItem("conversas", JSON.stringify(lista));
@@ -39,107 +30,72 @@ export default function StatusFlow() {
   const getConversasByStatus = (status: Status) =>
     conversas.filter((c) => c.status === status);
 
-  /* ============================================================
-     DESKTOP — USO DO DRAG NATIVO
-  ============================================================ */
+  /* ================================
+        DESKTOP DRAG NATIVO
+  ================================ */
   const handleDragStart = (conversa: Conversa) => {
-    setDraggedItem(conversa);
+    draggedItem.current = conversa;
   };
 
-  const handleDrop = (e: React.DragEvent, newStatus: Status) => {
+  const handleDrop = (e: any, newStatus: Status) => {
     e.preventDefault();
-    if (!draggedItem) return;
-
     applyStatusChange(newStatus);
   };
 
-  /* ============================================================
-     MOBILE — TOUCH DRAG IMPLEMENTADO DO ZERO
-  ============================================================ */
+  /* ================================
+        MOBILE — SEGURA 300ms → DRAG
+  ================================ */
 
-  const handleTouchStart = (e: any, conversa: Conversa) => {
-    setDraggedItem(conversa);
+  const handleTouchStart = (conversa: Conversa) => {
+    dragging.current = false;
 
-    const touch = e.touches[0];
-    const card = e.target.closest(".drag-card");
-    const rect = card.getBoundingClientRect();
-
-    // posição relativa do dedo no card
-    touchOffset.current = {
-      x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top,
-    };
-
-    // cria ghost
-    const ghost = document.createElement("div");
-    ghost.className =
-      "fixed z-[9999] opacity-90 pointer-events-none w-[85vw] max-w-[320px]";
-    ghost.style.left = rect.left + "px";
-    ghost.style.top = rect.top + "px";
-    ghost.innerHTML = card.innerHTML;
-    document.body.appendChild(ghost);
-
-    ghostRef.current = ghost;
+    dragTimeout.current = setTimeout(() => {
+      draggedItem.current = conversa;
+      dragging.current = true;
+    }, 250); // tempo perfeito para simular drag
   };
 
   const handleTouchMove = (e: any) => {
-    if (!ghostRef.current) return;
+    if (!dragging.current) return; // ainda clicando, não arrastando
 
-    const touch = e.touches[0];
-    ghostRef.current.style.left =
-      touch.clientX - touchOffset.current.x + "px";
-    ghostRef.current.style.top =
-      touch.clientY - touchOffset.current.y + "px";
-
-    e.preventDefault(); // impede o scroll durante o drag
+    e.preventDefault(); // evita selecionar texto
   };
 
-  const handleTouchEnd = (e: any) => {
-    if (!ghostRef.current) return;
+  const handleTouchEnd = (e: any, status: Status) => {
+    clearTimeout(dragTimeout.current);
 
-    const ghost = ghostRef.current;
-    ghost.remove();
-    ghostRef.current = null;
+    if (!dragging.current) return; // foi só clique, não arraste
+    dragging.current = false;
 
     const touch = e.changedTouches[0];
-    const dropTarget = document.elementFromPoint(
-      touch.clientX,
-      touch.clientY
-    );
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
 
-    if (!dropTarget) {
-      setDraggedItem(null);
-      return;
-    }
+    if (!el) return;
 
-    // encontra coluna alvo
-    const column = dropTarget.closest("[data-status]");
-    if (column && draggedItem) {
-      const newStatus = column.getAttribute("data-status") as Status;
-      applyStatusChange(newStatus);
-    }
+    const column = el.closest("[data-status]");
+    if (!column) return;
 
-    setDraggedItem(null);
+    const newStatus = column.getAttribute("data-status") as Status;
+    applyStatusChange(newStatus);
   };
 
-  /* ============================================================
-     APLICA ALTERAÇÃO DE STATUS
-  ============================================================ */
-
+  /* ================================
+        ALTERA STATUS
+  ================================ */
   const applyStatusChange = (newStatus: Status) => {
-    if (!draggedItem) return;
+    if (!draggedItem.current) return;
 
-    const atualizada = conversas.map((c) =>
-      c.id === draggedItem.id
-        ? { ...c, status: newStatus, updated_at: new Date().toISOString() }
+    const atualizado = conversas.map((c) =>
+      c.id === draggedItem.current!.id
+        ? { ...c, status: newStatus }
         : c
     );
 
-    setConversas(atualizada);
-    saveConversas(atualizada);
-  };
+    setConversas(atualizado);
+    saveConversas(atualizado);
 
-  /* ============================================================ */
+    draggedItem.current = null;
+  };
 
   const getStatusColor = (status: Status) => {
     const colors: Record<Status, string> = {
@@ -152,80 +108,60 @@ export default function StatusFlow() {
     return colors[status];
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        Carregando...
-      </div>
-    );
-  }
+  if (loading) return <div className="py-12 text-center text-gray-500">Carregando...</div>;
 
   return (
     <div className="space-y-6">
-      {/* Título */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Fluxo por Status
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Arraste e solte para alterar o status
-        </p>
-      </div>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        Fluxo por Status
+      </h2>
+      <p className="text-gray-600 dark:text-gray-400">
+        Arraste e solte para alterar o status
+      </p>
 
-      {/* COLUNAS */}
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+      <div className="flex gap-4 overflow-x-auto pb-4">
         {STATUS_OPTIONS.map((status) => {
           const statusConversas = getConversasByStatus(status);
 
           return (
             <div
               key={status}
-              data-status={status} // necessário p/ mobile detectar destino
-              className="flex-shrink-0 w-[85vw] sm:w-80 snap-start"
+              data-status={status}
+              className="flex-shrink-0 w-[85vw] sm:w-80"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => handleDrop(e, status)}
             >
               <div
-                className={`
-                  bg-white dark:bg-gray-800
-                  rounded-lg shadow-sm
-                  border-t-4 ${getStatusColor(status)}
-                  transition-colors
-                `}
+                className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 ${getStatusColor(
+                  status
+                )}`}
               >
-                {/* Cabeçalho */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {status}
-                    </h3>
-
-                    <span className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
+                  <div className="flex justify-between">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{status}</h3>
+                    <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full">
                       {statusConversas.length}
                     </span>
                   </div>
                 </div>
 
-                {/* Cards */}
                 <div className="p-4 space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto">
-                  {statusConversas.length > 0 ? (
+                  {statusConversas.length ? (
                     statusConversas.map((conversa) => (
                       <div
                         key={conversa.id}
                         draggable
                         onDragStart={() => handleDragStart(conversa)}
-                        onTouchStart={(e) =>
-                          handleTouchStart(e, conversa)
-                        }
+                        onTouchStart={() => handleTouchStart(conversa)}
                         onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        className="drag-card cursor-move active:scale-95 transition-transform"
+                        onTouchEnd={(e) => handleTouchEnd(e, status)}
+                        className="cursor-move active:scale-95 transition"
                       >
                         <ConversaCard conversa={conversa} />
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500 py-8 text-center">
+                    <p className="text-sm text-gray-500 text-center py-8">
                       Nenhuma conversa
                     </p>
                   )}

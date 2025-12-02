@@ -5,7 +5,7 @@ interface ConversaCardProps {
   conversa: Conversa;
   onClick?: () => void;
 
-  // 🔹 Handlers vindos do StatusFlow
+  // Handlers vindos do StatusFlow
   onTouchStartDrag?: (e: React.TouchEvent, conversa: Conversa) => void;
   onTouchMoveDrag?: (e: React.TouchEvent) => void;
   onTouchEndDrag?: (e: React.TouchEvent) => void;
@@ -25,7 +25,7 @@ export default function ConversaCard({
       'Em andamento': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
       'Aguardando resposta': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
       'Concluída': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-      'Perdida': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+      'Perdida': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
     };
     return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
@@ -39,7 +39,7 @@ export default function ConversaCard({
       draggable={false}
       onClick={() => onClick?.()}
 
-      // 🔹 repassa eventos para o StatusFlow
+      // repassa eventos para o StatusFlow
       onTouchStart={(e) => onTouchStartDrag?.(e, conversa)}
       onTouchMove={(e) => onTouchMoveDrag?.(e)}
       onTouchEnd={(e) => onTouchEndDrag?.(e)}
@@ -71,7 +71,6 @@ export default function ConversaCard({
 
       {/* INFO */}
       <div className="space-y-2 text-sm md:text-[15px]">
-
         <a
           href={`https://wa.me/${formatPhone(conversa.telefone)}`}
           target="_blank"
