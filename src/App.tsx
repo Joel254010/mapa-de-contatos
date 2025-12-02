@@ -14,7 +14,7 @@ import Header from './components/Header';
 import { Conversa } from './types/conversa';
 import ConversaCard from './components/ConversaCard';
 
-// ⚠️ SEM SUPABASE – modo local temporário
+// ⚠️ Modo local — sem Supabase ainda
 
 type Page = 'dashboard' | 'add' | 'category' | 'state' | 'flow' | 'settings';
 
@@ -24,18 +24,22 @@ function AppContent() {
   const [filteredConversas, setFilteredConversas] = useState<Conversa[]>([]);
   const [allConversas, setAllConversas] = useState<Conversa[]>([]);
 
-  // 📱 CONTROLE DA SIDEBAR NO MOBILE
+  // 📱 Sidebar Mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // 🔄 Carregar conversas do localStorage
+  /* ============================================================
+     🔄 Carregar conversas do localStorage ao iniciar
+     ============================================================ */
   useEffect(() => {
     const storage = localStorage.getItem("conversas");
     if (storage) setAllConversas(JSON.parse(storage));
   }, []);
 
-  // 🔎 Sistema de busca local
+  /* ============================================================
+     🔎 Sistema de busca local
+     ============================================================ */
   useEffect(() => {
-    if (searchQuery) {
+    if (searchQuery.trim()) {
       searchConversas(searchQuery);
     } else {
       setFilteredConversas([]);
@@ -43,12 +47,11 @@ function AppContent() {
   }, [searchQuery, allConversas]);
 
   const searchConversas = (query: string) => {
-    if (!query.trim()) {
+    const q = query.toLowerCase().trim();
+    if (!q) {
       setFilteredConversas([]);
       return;
     }
-
-    const q = query.toLowerCase();
 
     const results = allConversas.filter(conversa =>
       conversa.nome.toLowerCase().includes(q) ||
@@ -60,20 +63,28 @@ function AppContent() {
     setFilteredConversas(results);
   };
 
+  /* ============================================================
+     🔄 Navegação entre páginas
+     ============================================================ */
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
     setSearchQuery('');
     setFilteredConversas([]);
-    setIsSidebarOpen(false); // fecha sidebar no mobile ao navegar
+    setIsSidebarOpen(false); // fecha sidebar no mobile
   };
 
+  /* ============================================================
+     🔄 Após adicionar conversa com sucesso
+     ============================================================ */
   const handleAddSuccess = () => {
     const storage = localStorage.getItem("conversas");
     if (storage) setAllConversas(JSON.parse(storage));
     setCurrentPage('dashboard');
   };
 
-  /* ====================== RENDER DA PAGE ====================== */
+  /* ============================================================
+     🎨 Render da página atual
+     ============================================================ */
   const renderPage = () => {
     if (searchQuery && filteredConversas.length > 0) {
       return (
@@ -117,12 +128,13 @@ function AppContent() {
     }
   };
 
-  /* ====================== LAYOUT ====================== */
-
+  /* ============================================================
+     🧱 Layout Principal
+     ============================================================ */
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
 
-      {/* 📱 SIDEBAR COM SUPORTE A MOBILE */}
+      {/* 📱 Sidebar Mobile + Desktop */}
       <Sidebar
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -130,8 +142,8 @@ function AppContent() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* 📱 CONTEÚDO PRINCIPAL */}
-      <div className="flex-1 flex flex-col"> {/* ❗ REMOVIDO overflow-hidden */}
+      {/* 📄 Conteúdo */}
+      <div className="flex-1 flex flex-col">
 
         <Header
           searchQuery={searchQuery}
@@ -139,6 +151,7 @@ function AppContent() {
           onToggleSidebar={() => setIsSidebarOpen(true)}
         />
 
+        {/* Scroll liberado corretamente no mobile */}
         <main className="flex-1 overflow-y-auto p-6 mobile-scroll">
           {renderPage()}
         </main>
@@ -146,10 +159,11 @@ function AppContent() {
       </div>
     </div>
   );
-} // <= 👈 ESSA CHAVE FALTAVA!!
+}
 
-/* ====================== ROOT APP ====================== */
-
+/* ============================================================
+   🌎 App Root
+============================================================ */
 function App() {
   return (
     <ThemeProvider>
@@ -159,4 +173,3 @@ function App() {
 }
 
 export default App;
-
