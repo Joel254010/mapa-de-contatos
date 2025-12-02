@@ -18,9 +18,7 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
     return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
 
-  const formatPhone = (phone: string) => {
-    return phone.replace(/\D/g, '');
-  };
+  const formatPhone = (phone: string) => phone.replace(/\D/g, '');
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -30,16 +28,36 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-all cursor-pointer border border-gray-200 dark:border-gray-700"
+      className="
+        bg-white dark:bg-gray-800 
+        rounded-xl p-4 shadow-sm hover:shadow-md 
+        transition-all cursor-pointer 
+        border border-gray-200 dark:border-gray-700
+        card
+      "
     >
+
+      {/* HEADER DO CARD */}
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white">{conversa.nome}</h3>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(conversa.status)}`}>
+        
+        <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-lg leading-tight">
+          {conversa.nome}
+        </h3>
+
+        <span
+          className={`
+            px-2 py-1 rounded-full text-[10px] md:text-xs font-medium whitespace-nowrap
+            ${getStatusColor(conversa.status)}
+          `}
+        >
           {conversa.status}
         </span>
       </div>
 
-      <div className="space-y-2 text-sm">
+      {/* LISTA DE INFORMAÇÕES */}
+      <div className="space-y-2 text-sm md:text-[15px]">
+
+        {/* TELEFONE */}
         <a
           href={`https://wa.me/${formatPhone(conversa.telefone)}`}
           target="_blank"
@@ -47,28 +65,35 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
           onClick={(e) => e.stopPropagation()}
           className="flex items-center gap-2 text-[#25D366] hover:text-[#1DA851] transition-colors"
         >
-          <Phone size={16} />
-          <span>{conversa.telefone}</span>
+          <Phone size={18} className="md:size-20" />
+          <span className="truncate">{conversa.telefone}</span>
         </a>
 
+        {/* ESTADO */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-          <MapPin size={16} />
+          <MapPin size={18} />
           <span>{conversa.estado}</span>
         </div>
 
+        {/* CATEGORIA */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-          <Tag size={16} />
-          <span>{conversa.categoria}</span>
+          <Tag size={18} />
+          <span className="capitalize">{conversa.categoria}</span>
         </div>
 
+        {/* DATA */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-          <Calendar size={16} />
+          <Calendar size={18} />
           <span>{formatDate(conversa.data)}</span>
         </div>
       </div>
 
+      {/* DESCRIÇÃO */}
       {conversa.descricao && (
-        <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+        <p className="
+          mt-3 text-sm md:text-[15px] text-gray-600 dark:text-gray-400 
+          line-clamp-2 leading-snug
+        ">
           {conversa.descricao}
         </p>
       )}

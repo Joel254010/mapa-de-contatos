@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { Conversa, CATEGORIAS } from '../types/conversa';
 import ConversaCard from '../components/ConversaCard';
 
@@ -11,18 +10,22 @@ export default function CategoryMap() {
     loadConversas();
   }, []);
 
-  const loadConversas = async () => {
+  // 🔄 Carregar conversas do localStorage
+  const loadConversas = () => {
     try {
-      const { data } = await supabase
-        .from('conversas')
-        .select('*')
-        .order('updated_at', { ascending: false });
+      const storage = localStorage.getItem('conversas');
+      if (storage) {
+        const parsed = JSON.parse(storage);
 
-      if (data) {
-        setConversas(data);
+        // Ordenar por updated_at para manter padrão do Supabase
+        const ordenado = parsed.sort((a: Conversa, b: Conversa) => {
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        });
+
+        setConversas(ordenado);
       }
     } catch (error) {
-      console.error('Error loading conversas:', error);
+      console.error('Erro ao carregar conversas:', error);
     } finally {
       setLoading(false);
     }
@@ -47,36 +50,82 @@ export default function CategoryMap() {
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500 dark:text-gray-400">Carregando...</div>;
+    return (
+      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        Carregando...
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
+
+      {/* TÍTULO */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Mapa por Categoria</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">Conversas organizadas por tipo</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Mapa por Categoria
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
+          Conversas organizadas por tipo
+        </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      {/* CARROSSEL DE CATEGORIAS */}
+      <div
+        className="
+          flex gap-4 overflow-x-auto pb-4 
+          snap-x snap-mandatory 
+          scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
+        "
+      >
         {CATEGORIAS.map(categoria => {
           const categoryConversas = getConversasByCategory(categoria);
 
           return (
             <div
               key={categoria}
-              className="flex-shrink-0 w-80"
+              className="
+                flex-shrink-0 w-80 
+                snap-center 
+                md:snap-start
+              "
             >
-              <div className={`bg-white dark:bg-gray-800 rounded-lg border-t-4 ${getCategoryColor(categoria)} shadow-sm transition-colors`}>
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{categoria}</h3>
-                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium">
-                      {categoryConversas.length}
-                    </span>
-                  </div>
+              <div
+                className={`
+                  bg-white dark:bg-gray-800 
+                  rounded-lg shadow-sm 
+                  border-t-4 ${getCategoryColor(categoria)}
+                  transition-all
+                `}
+              >
+
+                {/* CABEÇALHO */}
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {categoria}
+                  </h3>
+
+                  <span
+                    className="
+                      bg-gray-100 dark:bg-gray-700 
+                      text-gray-700 dark:text-gray-300 
+                      px-2 py-1 rounded-full 
+                      text-xs font-medium
+                    "
+                  >
+                    {categoryConversas.length}
+                  </span>
                 </div>
 
-                <div className="p-4 space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+                {/* LISTA */}
+                <div
+                  className="
+                    p-4 space-y-3 
+                    max-h-[65vh] md:max-h-[calc(100vh-300px)] 
+                    overflow-y-auto
+                    mobile-scroll
+                  "
+                >
                   {categoryConversas.length > 0 ? (
                     categoryConversas.map(conversa => (
                       <ConversaCard key={conversa.id} conversa={conversa} />
@@ -87,6 +136,7 @@ export default function CategoryMap() {
                     </p>
                   )}
                 </div>
+
               </div>
             </div>
           );
