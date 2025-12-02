@@ -7,6 +7,7 @@ interface ConversaCardProps {
 }
 
 export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'Iniciada': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -19,27 +20,23 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
   };
 
   const formatPhone = (phone: string) => phone.replace(/\D/g, '');
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('pt-BR');
 
   return (
     <div
-      onClick={onClick}
       className="
         bg-white dark:bg-gray-800 
         rounded-xl p-4 shadow-sm hover:shadow-md 
-        transition-all cursor-pointer 
+        transition-all 
         border border-gray-200 dark:border-gray-700
-        card
+        select-none
       "
+      // 👉 Não usar onClick aqui para não bloquear o DRAG no mobile
+      // Se precisar abrir detalhes, vamos colocar em outro botão depois.
     >
 
-      {/* HEADER DO CARD */}
+      {/* HEADER */}
       <div className="flex items-start justify-between mb-3">
-        
         <h3 className="font-semibold text-gray-900 dark:text-white text-base md:text-lg leading-tight">
           {conversa.nome}
         </h3>
@@ -54,34 +51,34 @@ export default function ConversaCard({ conversa, onClick }: ConversaCardProps) {
         </span>
       </div>
 
-      {/* LISTA DE INFORMAÇÕES */}
+      {/* INFOS */}
       <div className="space-y-2 text-sm md:text-[15px]">
 
-        {/* TELEFONE */}
+        {/* Telefone */}
         <a
           href={`https://wa.me/${formatPhone(conversa.telefone)}`}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          // ⚠️ Remove o stopPropagation — atrapalha o drag no mobile
           className="flex items-center gap-2 text-[#25D366] hover:text-[#1DA851] transition-colors"
         >
-          <Phone size={18} className="md:size-20" />
+          <Phone size={18} />
           <span className="truncate">{conversa.telefone}</span>
         </a>
 
-        {/* ESTADO */}
+        {/* Estado */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <MapPin size={18} />
           <span>{conversa.estado}</span>
         </div>
 
-        {/* CATEGORIA */}
+        {/* Categoria */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Tag size={18} />
           <span className="capitalize">{conversa.categoria}</span>
         </div>
 
-        {/* DATA */}
+        {/* Data */}
         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <Calendar size={18} />
           <span>{formatDate(conversa.data)}</span>
