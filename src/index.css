@@ -9,9 +9,12 @@
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
   background-color: #F8FAFC;
   -webkit-tap-highlight-color: transparent;
+
+  /* ❗ REMOVIDO: overflow-x: hidden; */
+  overflow-x: visible !important;     /* 🔥 libera scroll horizontal global */
+  overscroll-behavior-x: contain;     /* evita scroll fantasma */
 }
 
 /* Fonte geral no mobile */
@@ -22,24 +25,26 @@ html, body {
   }
 }
 
-/* Layout principal deve ocupar largura total */
+/* Layout principal */
 main {
   display: block;
   width: 100%;
-  overflow-x: hidden;
+
+  /* ❗ REMOVIDO: overflow-x: hidden; */
+  overflow-x: visible !important;     /* permite scroll lateral dentro do conteúdo */
 }
 
 * {
   box-sizing: border-box;
-  touch-action: auto; /* 🔥 evita travar scroll */
+  touch-action: auto;
 }
 
 /* ============================================================
-   🔥 FIX — CARDS DEVEM PERMITIR SCROLL VERTICAL
+   🔥 CARDS PERMITEM SCROLL VERTICAL
    ============================================================ */
 
 .drag-card {
-  touch-action: pan-y !important;  /* permite scroll suave */
+  touch-action: pan-y !important;
 }
 
 /* ============================================================
@@ -157,15 +162,15 @@ select {
 }
 
 /* ============================================================
-   🔥 FIX PRINCIPAL — SCROLL SUAVE MOBILE
+   🔥 SCROLL SUAVE MOBILE
    ============================================================ */
 
 .mobile-scroll {
   height: 100%;
-  min-height: calc(100dvh - 60px); /* usa viewport dinâmica moderna */
+  min-height: calc(100dvh - 60px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 2rem;
-  -webkit-overflow-scrolling: touch; /* iOS */
 }
 
 /* ============================================================
@@ -203,8 +208,8 @@ button {
 }
 
 /* ============================================================
-   🔥 FIX DEFINITIVO — PERMITIR SCROLL HORIZONTAL EM PÁGINAS INTERNAS
+   🔥 FIX DEFINITIVO — LIBERAR SCROLL LATERAL
    ============================================================ */
 .no-x-limit {
-  overflow-x: visible !important; /* libera scroll horizontal dentro do conteúdo */
+  overflow-x: visible !important;
 }

@@ -14,15 +14,7 @@ import Header from './components/Header';
 import { Conversa } from './types/conversa';
 import ConversaCard from './components/ConversaCard';
 
-// ⚠️ Modo local — sem Supabase ainda
-
-type Page =
-  | 'dashboard'
-  | 'add'
-  | 'category'
-  | 'state'
-  | 'flow'
-  | 'settings';
+type Page = 'dashboard' | 'add' | 'category' | 'state' | 'flow' | 'settings';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -32,16 +24,16 @@ function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   /* ============================================================
-     🔄 Carregar conversas do localStorage ao iniciar
-     ============================================================ */
+     🔄 CARREGAR CONVERSAS
+  ============================================================ */
   useEffect(() => {
     const storage = localStorage.getItem('conversas');
     if (storage) setAllConversas(JSON.parse(storage));
   }, []);
 
   /* ============================================================
-     🔎 Sistema de busca
-     ============================================================ */
+     🔎 SISTEMA DE BUSCA
+  ============================================================ */
   useEffect(() => {
     if (searchQuery.trim()) {
       searchConversas(searchQuery);
@@ -69,8 +61,8 @@ function AppContent() {
   };
 
   /* ============================================================
-     Navegação
-     ============================================================ */
+     🔁 NAVEGAÇÃO
+  ============================================================ */
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
     setSearchQuery('');
@@ -79,8 +71,8 @@ function AppContent() {
   };
 
   /* ============================================================
-     Após adicionar conversa
-     ============================================================ */
+     ➕ APÓS ADICIONAR CONVERSA
+  ============================================================ */
   const handleAddSuccess = () => {
     const storage = localStorage.getItem('conversas');
     if (storage) setAllConversas(JSON.parse(storage));
@@ -88,8 +80,8 @@ function AppContent() {
   };
 
   /* ============================================================
-     Render da página
-     ============================================================ */
+     🧾 RENDER DA PÁGINA
+  ============================================================ */
   const renderPage = () => {
     if (searchQuery && filteredConversas.length > 0) {
       return (
@@ -141,10 +133,11 @@ function AppContent() {
   };
 
   /* ============================================================
-     Layout principal
-     ============================================================ */
+     🧱 LAYOUT PRINCIPAL
+  ============================================================ */
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+
       <Sidebar
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -153,26 +146,33 @@ function AppContent() {
       />
 
       <div className="flex-1 flex flex-col">
+
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onToggleSidebar={() => setIsSidebarOpen(true)}
         />
 
-        {/* 🔥 FIX CRÍTICO: libera scroll horizontal dos carrosséis */}
+        {/* 🎯 FIX REAL PARA MOBILE:
+            - mantemos scroll vertical liberado
+            - NÃO bloqueamos scroll horizontal dos carrosséis */}
         <main
-          className="flex-1 p-6 mobile-scroll overflow-y-auto"
-          style={{ overflowX: 'visible' }}
+          className="flex-1 p-6 overflow-y-auto mobile-scroll"
+          style={{
+            overflowX: "hidden",  // impede conflito com carrosséis
+            touchAction: "pan-y", // libera gesto vertical sem bloquear horizontal dentro dos carrosséis
+          }}
         >
           {renderPage()}
         </main>
+
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   Root
+   ROOT
 ============================================================ */
 function App() {
   return (

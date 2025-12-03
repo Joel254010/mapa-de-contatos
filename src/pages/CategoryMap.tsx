@@ -17,7 +17,6 @@ export default function CategoryMap() {
       if (storage) {
         const parsed = JSON.parse(storage);
 
-        // Ordena para manter consistência visual
         const ordenado = parsed.sort((a: Conversa, b: Conversa) => {
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
         });
@@ -70,7 +69,9 @@ export default function CategoryMap() {
         </p>
       </div>
 
-      {/* ⚡️ CARROSSEL DE CATEGORIAS — SCROLL LATERAL CORRIGIDO */}
+      {/* ============================================================
+          ⚡️ CARROSSEL — SCROLL LATERAL REALMENTE CORRIGIDO
+         ============================================================ */}
       <div
         className="
           flex gap-4 
@@ -79,13 +80,13 @@ export default function CategoryMap() {
           scroll-smooth
           snap-x snap-mandatory
           whitespace-nowrap
-          touch-pan-x
           pr-6
           scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
         "
         style={{
           WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-x pinch-zoom' // 🔥 FIX MOBILE
+          touchAction: 'pan-x pinch-zoom', // 🔥 permite arrastar lateral sem travar
+          overscrollBehaviorX: 'contain'  // impede conflito do main
         }}
       >
         {CATEGORIAS.map(categoria => {
@@ -128,16 +129,19 @@ export default function CategoryMap() {
                   </span>
                 </div>
 
-                {/* LISTAGEM — SCROLL PARA BAIXO FUNCIONANDO */}
+                {/* =====================================================
+                    LISTA COM SCROLL PARA BAIXO CORRIGIDO
+                   ===================================================== */}
                 <div
                   className="
                     p-4 space-y-3 
-                    max-h-[65vh] md:max-h-[calc(100vh-300px)]
-                    overflow-y-auto 
+                    max-h-[65vh] md:max-h-[calc(100vh-300px)] 
+                    overflow-y-auto
                   "
                   style={{
                     WebkitOverflowScrolling: 'touch',
-                    touchAction: 'pan-y'  // 🔥 LIBERA SCROLL VERTICAL
+                    touchAction: 'pan-y',   // 🔥 libera scroll vertical interno sem bloquear lateral
+                    overscrollBehaviorY: 'contain'
                   }}
                 >
                   {categoryConversas.length > 0 ? (
