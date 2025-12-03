@@ -17,7 +17,6 @@ export default function CategoryMap() {
       if (storage) {
         const parsed = JSON.parse(storage);
 
-        // Ordenar por updated_at para manter padrão do Supabase
         const ordenado = parsed.sort((a: Conversa, b: Conversa) => {
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
         });
@@ -73,10 +72,16 @@ export default function CategoryMap() {
       {/* CARROSSEL DE CATEGORIAS */}
       <div
         className="
-          flex gap-4 overflow-x-auto pb-4 
-          snap-x snap-mandatory 
+          flex gap-4
+          overflow-x-auto overflow-y-hidden
+          pb-4 px-1
+          scroll-smooth
+          snap-x snap-mandatory
+          touch-pan-x
+          whitespace-nowrap
           scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
         "
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {CATEGORIAS.map(categoria => {
           const categoryConversas = getConversasByCategory(categoria);
@@ -85,7 +90,8 @@ export default function CategoryMap() {
             <div
               key={categoria}
               className="
-                flex-shrink-0 w-80 
+                flex-shrink-0 
+                w-80 
                 snap-center 
                 md:snap-start
               "
@@ -122,9 +128,9 @@ export default function CategoryMap() {
                   className="
                     p-4 space-y-3 
                     max-h-[65vh] md:max-h-[calc(100vh-300px)] 
-                    overflow-y-auto
-                    mobile-scroll
+                    overflow-y-auto 
                   "
+                  style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                   {categoryConversas.length > 0 ? (
                     categoryConversas.map(conversa => (
