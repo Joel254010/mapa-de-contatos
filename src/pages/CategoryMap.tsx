@@ -17,6 +17,7 @@ export default function CategoryMap() {
       if (storage) {
         const parsed = JSON.parse(storage);
 
+        // Ordena para manter consistência visual
         const ordenado = parsed.sort((a: Conversa, b: Conversa) => {
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
         });
@@ -69,19 +70,23 @@ export default function CategoryMap() {
         </p>
       </div>
 
-      {/* CARROSSEL DE CATEGORIAS */}
+      {/* ⚡️ CARROSSEL DE CATEGORIAS — SCROLL LATERAL CORRIGIDO */}
       <div
         className="
-          flex gap-4
+          flex gap-4 
           overflow-x-auto overflow-y-hidden
           pb-4 px-1
           scroll-smooth
           snap-x snap-mandatory
-          touch-pan-x
           whitespace-nowrap
+          touch-pan-x
+          pr-6
           scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
         "
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-x pinch-zoom' // 🔥 FIX MOBILE
+        }}
       >
         {CATEGORIAS.map(categoria => {
           const categoryConversas = getConversasByCategory(categoria);
@@ -123,14 +128,17 @@ export default function CategoryMap() {
                   </span>
                 </div>
 
-                {/* LISTA */}
+                {/* LISTAGEM — SCROLL PARA BAIXO FUNCIONANDO */}
                 <div
                   className="
                     p-4 space-y-3 
-                    max-h-[65vh] md:max-h-[calc(100vh-300px)] 
+                    max-h-[65vh] md:max-h-[calc(100vh-300px)]
                     overflow-y-auto 
                   "
-                  style={{ WebkitOverflowScrolling: 'touch' }}
+                  style={{
+                    WebkitOverflowScrolling: 'touch',
+                    touchAction: 'pan-y'  // 🔥 LIBERA SCROLL VERTICAL
+                  }}
                 >
                   {categoryConversas.length > 0 ? (
                     categoryConversas.map(conversa => (

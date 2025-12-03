@@ -201,3 +201,10 @@ button {
 .sidebar-overlay {
   z-index: 9998 !important;
 }
+
+/* ============================================================
+   🔥 FIX DEFINITIVO — PERMITIR SCROLL HORIZONTAL EM PÁGINAS INTERNAS
+   ============================================================ */
+.no-x-limit {
+  overflow-x: visible !important; /* libera scroll horizontal dentro do conteúdo */
+}
