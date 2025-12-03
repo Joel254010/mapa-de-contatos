@@ -12,8 +12,6 @@ const menuItems = [
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
-
-  // 🔥 Novos props integrados ao App.tsx
   isOpen: boolean;
   onClose: () => void;
 }
@@ -21,12 +19,12 @@ interface SidebarProps {
 export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }: SidebarProps) {
   const handleNavigate = (page: string) => {
     onNavigate(page);
-    onClose(); // fecha no mobile
+    onClose();
   };
 
   return (
     <>
-      {/* 🟢 OVERLAY — aparece apenas quando sidebar está aberta no mobile */}
+      {/* OVERLAY */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -34,13 +32,13 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }: Si
         />
       )}
 
-      {/* 🟢 SIDEBAR */}
+      {/* SIDEBAR */}
       <aside
         className={`
-          fixed md:static top-0 left-0 h-full z-50
-          bg-[#0B3C5D] text-white flex flex-col w-64
-          transform transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          fixed md:static top-0 left-0 h-full z-50 bg-[#0B3C5D] 
+          text-white flex flex-col w-64 transition-transform duration-300
+
+          ${isOpen ? 'translate-x-0 pointer-events-auto' : '-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto'}
         `}
       >
         {/* HEADER */}
@@ -50,7 +48,6 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }: Si
             <p className="text-xs text-white/70 mt-1">Organizador de Conversas</p>
           </div>
 
-          {/* BOTÃO FECHAR — só no mobile */}
           <button
             onClick={onClose}
             className="md:hidden text-white"
@@ -82,7 +79,7 @@ export default function Sidebar({ currentPage, onNavigate, isOpen, onClose }: Si
           })}
         </nav>
 
-        {/* RODAPÉ */}
+        {/* FOOTER */}
         <div className="p-4 border-t border-white/10 text-center text-xs text-white/50">
           v1.0.0
         </div>
