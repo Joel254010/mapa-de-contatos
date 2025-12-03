@@ -16,27 +16,31 @@ import ConversaCard from './components/ConversaCard';
 
 // ⚠️ Modo local — sem Supabase ainda
 
-type Page = 'dashboard' | 'add' | 'category' | 'state' | 'flow' | 'settings';
+type Page =
+  | 'dashboard'
+  | 'add'
+  | 'category'
+  | 'state'
+  | 'flow'
+  | 'settings';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredConversas, setFilteredConversas] = useState<Conversa[]>([]);
   const [allConversas, setAllConversas] = useState<Conversa[]>([]);
-
-  // 📱 Sidebar Mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   /* ============================================================
      🔄 Carregar conversas do localStorage ao iniciar
      ============================================================ */
   useEffect(() => {
-    const storage = localStorage.getItem("conversas");
+    const storage = localStorage.getItem('conversas');
     if (storage) setAllConversas(JSON.parse(storage));
   }, []);
 
   /* ============================================================
-     🔎 Sistema de busca local
+     🔎 Sistema de busca
      ============================================================ */
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -53,37 +57,38 @@ function AppContent() {
       return;
     }
 
-    const results = allConversas.filter(conversa =>
-      conversa.nome.toLowerCase().includes(q) ||
-      conversa.telefone.toLowerCase().includes(q) ||
-      conversa.categoria.toLowerCase().includes(q) ||
-      conversa.estado.toLowerCase().includes(q)
+    const results = allConversas.filter(
+      (c) =>
+        c.nome.toLowerCase().includes(q) ||
+        c.telefone.toLowerCase().includes(q) ||
+        c.categoria.toLowerCase().includes(q) ||
+        c.estado.toLowerCase().includes(q)
     );
 
     setFilteredConversas(results);
   };
 
   /* ============================================================
-     🔄 Navegação entre páginas
+     Navegação
      ============================================================ */
   const handleNavigate = (page: string) => {
     setCurrentPage(page as Page);
     setSearchQuery('');
     setFilteredConversas([]);
-    setIsSidebarOpen(false); // fecha sidebar no mobile
+    setIsSidebarOpen(false);
   };
 
   /* ============================================================
-     🔄 Após adicionar conversa com sucesso
+     Após adicionar conversa
      ============================================================ */
   const handleAddSuccess = () => {
-    const storage = localStorage.getItem("conversas");
+    const storage = localStorage.getItem('conversas');
     if (storage) setAllConversas(JSON.parse(storage));
     setCurrentPage('dashboard');
   };
 
   /* ============================================================
-     🎨 Render da página atual
+     Render da página
      ============================================================ */
   const renderPage = () => {
     if (searchQuery && filteredConversas.length > 0) {
@@ -99,7 +104,7 @@ function AppContent() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredConversas.map(conversa => (
+            {filteredConversas.map((conversa) => (
               <ConversaCard key={conversa.id} conversa={conversa} />
             ))}
           </div>
@@ -118,23 +123,28 @@ function AppContent() {
     }
 
     switch (currentPage) {
-      case 'dashboard': return <Dashboard />;
-      case 'add': return <AddConversa onSuccess={handleAddSuccess} />;
-      case 'category': return <CategoryMap />;
-      case 'state': return <StateMap />;
-      case 'flow': return <StatusFlow />;
-      case 'settings': return <Settings />;
-      default: return <Dashboard />;
+      case 'dashboard':
+        return <Dashboard />;
+      case 'add':
+        return <AddConversa onSuccess={handleAddSuccess} />;
+      case 'category':
+        return <CategoryMap />;
+      case 'state':
+        return <StateMap />;
+      case 'flow':
+        return <StatusFlow />;
+      case 'settings':
+        return <Settings />;
+      default:
+        return <Dashboard />;
     }
   };
 
   /* ============================================================
-     🧱 Layout Principal
+     Layout principal
      ============================================================ */
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-
-      {/* 📱 Sidebar Mobile + Desktop */}
       <Sidebar
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -142,27 +152,27 @@ function AppContent() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* 📄 Conteúdo */}
       <div className="flex-1 flex flex-col">
-
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onToggleSidebar={() => setIsSidebarOpen(true)}
         />
 
-        {/* Scroll liberado corretamente no mobile */}
-        <main className="flex-1 overflow-y-auto p-6 mobile-scroll">
+        {/* 🔥 FIX CRÍTICO: libera scroll horizontal dos carrosséis */}
+        <main
+          className="flex-1 p-6 mobile-scroll overflow-y-auto"
+          style={{ overflowX: 'visible' }}
+        >
           {renderPage()}
         </main>
-
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   🌎 App Root
+   Root
 ============================================================ */
 function App() {
   return (
